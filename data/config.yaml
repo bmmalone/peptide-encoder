@@ -1,0 +1,39 @@
+name: SampleConfigModel
+
+# usually automatically set, so this just needs to be set in some special case
+#device_name: cuda
+
+# model architecture
+embedding_dim: 16
+hidden_dim: 64
+
+lstm_layers: 2
+lstm_dropout: 0.5
+
+# optimizer
+adam_beta1: 0.9
+adam_beta2: 0.999
+adam_lr: 0.01
+weight_decay: 0
+
+# learning rate scheduler
+lr_patience: 3
+
+# number of instances for each training epoch
+num_instances: 20
+
+# hyperparameter tuning
+num_patience_epochs: 5
+num_training_epochs: 20
+
+# this has to be 1 for now
+batch_size: 1
+
+# in tests, these paths will be overwritten with correct paths
+training_set: /path/to/my/peptides.training.csv
+validation_set: /path/to/my/peptides.validation.csv
+test_set: /path/to/my/peptides.test.csv
+
+aa_encoding_map: /path/to/my/aa-encoding-map.jpkl
+
+out_dir: /tmp/aa-encoder-trainer
