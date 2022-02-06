@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 #logging_utils.set_logging_values(logging_level='DEBUG')
 
 import pepenc
+import pepenc.data.data_utils as data_utils
+import pepenc.models
 
 from typing import Mapping
 
@@ -24,14 +26,36 @@ from typing import Mapping
 def get_version() -> str:
     return pepenc.__version__
 
+def get_config() -> Mapping:
+    config = data_utils.load_sample_config()
+    return config
+
 @pytest.fixture
 def version() -> str:
     return get_version()
+
+@pytest.fixture
+def config() -> Mapping:
+    return get_config()
 
 
 ###
 # The actual tests
 ###
+def test_peptide_encoder_lstm_model(config:Mapping) -> None:
+    """ Ensure the training loop for the LSTM model behaves as expected """
+    model = pepenc.models.PeptideEncoderLSTM(config)
+    logs = model.step()
+
+    assert len(logs) > 0
+
+
+def test_training_config(config:Mapping) -> None:
+    """ Ensure the mode is set correctly on `config`
+    """
+    # "Assert" that we have the expected path for the training file
+    expected_training_path = "/prj/peptide-encoder/data/sample-peptides.training.csv"
+    assert (expected_training_path == config['training_set'])
 
 def test_version(version:str) -> None:
     """ Ensure we have the correct version
@@ -62,10 +86,14 @@ def run_all():
     This function is useful in case we want to run our tests outside of the
     pytest framework.
     """
-    # since we are not running through pytest, we have to grab the inputs to the
-    # tests
+    # since we are not running through pytest, we have to grab the inputs to the tests
     version = get_version()
     test_version(version)
+
+    config = get_config()
+    test_training_config(config)
+
+    test_peptide_encoder_lstm_model(config)
 
 if __name__ == '__main__':
     run_all()
