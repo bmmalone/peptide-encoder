@@ -1,0 +1,63 @@
+|-- LICENSE (if relevant)
+|
+|-- README.md			<- the top-level README for developers using this project
+|
+|-- CHANGELOG.md		<- a changelog for tracking changes over the history of a project.
+|						   Example: https://github.com/bmmalone/pyllars/blob/dev/CHANGELOG.md
+|
+|-- setup.cfg			<- project-specific configuration for python.
+|
+|-- .gitignore			<- avoid uploading data, credentials, outputs, system files, etc.
+|
+|-- conf
+|	|-- base			<- shared, not-secret configuration options
+|	|-- .env			<- local/secret configuration options, such as credentials
+|
+|-- data
+|	|-- raw				<- original data from publications. This could be symlinked.
+|	|-- intermediate	<- cleaned version of raw data
+|	|-- processed		<- parquet files to load into feature store
+|
+|-- docker				<- dockerfiles, docker-compose.yml files, etc.
+|
+|-- docs				<- base location for Sphinx documentation
+|	|-- formal			<- requirements and validation plan, etc., documentation
+|
+|-- models				<- trained and serialized models
+|
+|-- notebooks			<- naming conventions: s<step>.v<version>-<short-description>.
+|
+|-- references			<- data dictionaries, manuals, and other external explanatory material
+|
+|-- results				<- intermediate and final analysis results. These could be prediction files, polished
+|	|					   notebooks, latex, etc.
+|	|
+|	|-- figures			<- generated graphics, plots, etc.
+|	|-- reports			<- generated analysis intended for external stakeholders
+|
+|-- requirements.txt	<- the requirements file for reproducing the analysis environment
+|
+|-- setup.py			<- ensure we can install the project code using `pip install -e .`
+|
+|-- <prj>				<- the source code package. Many sources are available online for developing python packages.
+|	|					   Example: https://python-packaging-tutorial.readthedocs.io/en/latest/setup_py.html
+|	|
+|	|-- <prj>_utils.py	<- a module containing functions used across the package
+|	|
+|	|-- data			<- reading and writing data files
+|	|
+|	|-- features		<- transforming raw data into processed features
+|	|
+|	|-- models			<- building and training models, and then making predictions with the trained models
+|	|
+|	|-- evaluation		<- evaluating the predictions. N.B. This is _separate_ from training models and making
+|	|					   predictions. This ensures that data processing, prediction, etc., steps do not need to be
+|	|					   repeated each time a different evaluation is required.
+|	|
+|	|-- reporting		<- producing visualizations, tables, latex documents, etc.
+|
+|-- tests				<- pytest test files. Many tutorials are available online for pytest.
+|						   Example: https://realpython.com/pytest-python-testing/
+|
+|-- wdl					<- workflow description language (pipeline) files
+
