@@ -28,6 +28,7 @@ class PeptideEncoderTrainingDatasetItem(NamedTuple):
 _DEFAULT_SEQUENCE_COLUMN = 'sequence'
 _DEFAULT_SEED = 8675309
 _DEFAULT_NAME = "PeptideEncoderTrainingDataset"
+_DEFAULT_MAX_LEN = 25
 
 
 class PeptideEncoderTrainingDataset(torch.utils.data.Dataset):
@@ -45,14 +46,18 @@ class PeptideEncoderTrainingDataset(torch.utils.data.Dataset):
         and contain a column named `sequence_column` which includes the
         sequences. Other columns are ignored.
 
-    sequence_column : str
-        The name of the column which contains the amino acid sequences
-
     aa_encoding_map : pyllars.string_utils.encoding_map_type
         A mapping from each amino acid to its integer index.
 
         N.B. This should **not** be a one-hot representation, but, as stated,
-        the integer index.
+        the integer index. Further, the padding character must be "-".
+
+    sequence_column : str
+        The name of the column which contains the amino acid sequences
+
+    max_len : int
+        The maximum length for a peptide. Peptides longer than this will be
+        truncated, and shorter peptides will be padded to this length.
 
     seed : int
         Seed for the random number generator. This is used to randomly select
@@ -66,23 +71,27 @@ class PeptideEncoderTrainingDataset(torch.utils.data.Dataset):
             dataset_path:str,
             aa_encoding_map:string_utils.encoding_map_type,
             sequence_column:str=_DEFAULT_SEQUENCE_COLUMN,
+            max_len:int=_DEFAULT_MAX_LEN,
             seed:int=_DEFAULT_SEED,
             name:str=_DEFAULT_NAME):
 
-        self.name = name
-        self.seed = seed
         self.aa_encoding_map = aa_encoding_map
         self.sequence_column = sequence_column
-
-        df_peptides = PeptideDataset.load(dataset_path, sequence_column)
-        self.aa_sequences = df_peptides[self.sequence_column].values
-
-        self.encoded_aa_sequences = np.array([
-            string_utils.encode_sequence(p, aa_encoding_map)
-                for p in self.aa_sequences
-        ])
-
+        self.max_len = max_len        
+        self.seed = seed
+        self.name = name
         self.rng = np.random.default_rng(self.seed)
+
+        df_peptides = PeptideDataset.load(dataset_path, sequence_column, filters=["standard_aa_only"])
+        self.aa_sequences = df_peptides[self.sequence_column].values
+        self.encoded_aa_sequences = string_utils.encode_all_sequences(
+            sequences=self.aa_sequences,
+            encoding_map=self.aa_encoding_map,
+            maxlen=self.max_len,
+            pad_value='-',
+            same_length=False
+        )
+        self.encoded_aa_sequences = self.encoded_aa_sequences.astype(int)
         
 
     def log(self, msg:str, level:int=logging.INFO) -> None:
