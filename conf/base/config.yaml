@@ -27,7 +27,7 @@ num_patience_epochs: 5
 num_training_epochs: 20
 
 # this has to be 1 for now
-batch_size: 1
+batch_size: 64
 
 # in tests, these paths will be overwritten with correct paths
 training_set: /path/to/my/peptides.training.csv
