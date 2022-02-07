@@ -54,7 +54,7 @@ def test_training_config(config:Mapping) -> None:
     """ Ensure the mode is set correctly on `config`
     """
     # "Assert" that we have the expected path for the training file
-    expected_training_path = "/prj/peptide-encoder/data/sample-peptides.training.csv"
+    expected_training_path = "/prj/peptide-encoder/data/raw/sample-peptides.training.csv"
     assert (expected_training_path == config['training_set'])
 
 def test_version(version:str) -> None:
@@ -83,8 +83,7 @@ def test_version(version:str) -> None:
 def run_all():
     """ Run all of the tests
 
-    This function is useful in case we want to run our tests outside of the
-    pytest framework.
+    This function is useful in case we want to run our tests outside of the pytest framework.
     """
     # since we are not running through pytest, we have to grab the inputs to the tests
     version = get_version()

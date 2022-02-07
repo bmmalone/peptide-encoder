@@ -19,6 +19,7 @@ import toolz.dicttoolz as dicttoolz
 import pyllars.string_utils as string_utils
 import pyllars.torch.torch_utils as torch_utils
 
+import pepenc.pepenc_utils as pepenc_utils
 from pepenc.data.peptide_encoder_training_dataset import (
     PeptideEncoderTrainingDataset, PeptideEncoderTrainingDatasetItem
 )
@@ -33,7 +34,7 @@ _DEFAULT_ADAM_LR = 0.01
 _DEFAULT_LR_PATIENCE = 3
 _DEFAULT_WEIGHT_DECAY = 0
 
-_EPOCH_SIZE = 8192
+_EPOCH_SIZE = 40000
 _TEST_SIZE = 4096
 
 _DEFAULT_NAME = "PeptideEncoderLSTM"
@@ -114,13 +115,13 @@ class PeptideEncoderLSTM(ray.tune.Trainable):
         self.config['vocabulary_size'] = len(aa_encoding_map)
 
         self.training_set = PeptideEncoderTrainingDataset.load(
-            self.config.get('training_set'), self.aa_encoding_map, "TrainingDataset"
+            self.config.get('training_set'), self.aa_encoding_map, is_validation=False, name="TrainingDataset"
         )
         self.validation_set = PeptideEncoderTrainingDataset.load(
-            self.config.get('validation_set'), self.aa_encoding_map, "ValidationDataset"
+            self.config.get('validation_set'), self.aa_encoding_map, is_validation=True, name="ValidationDataset"
         )
         self.test_set = PeptideEncoderTrainingDataset.load(
-            self.config.get('test_set'), self.aa_encoding_map, "TestDataset"
+            self.config.get('test_set'), self.aa_encoding_map, is_validation=True, name="TestDataset"
         )
 
     def _prepare_network(self):
@@ -185,9 +186,14 @@ class PeptideEncoderLSTM(ray.tune.Trainable):
             # zero out the parameter gradients
             self.optimizer.zero_grad()
             
-            embedded_x = self.net(px)
-            embedded_y = self.net(py)
-            embedded_distance = torch.dist(embedded_x, embedded_y)
+            x_lengths = self.training_set.get_trimmed_peptide_lengths(peptide_x)
+            embedded_x = self.net(px, x_lengths)
+
+
+            y_lengths = self.training_set.get_trimmed_peptide_lengths(peptide_y)
+            embedded_y = self.net(py, y_lengths)
+
+            embedded_distance = pepenc_utils.calculate_matched_minkowski_distances(embedded_x, embedded_y)
             embedded_similarity = one - embedded_distance
 
             # calculate the loss
@@ -219,7 +225,7 @@ class PeptideEncoderLSTM(ray.tune.Trainable):
         self.net.eval() # make sure the network knows we are making predictions
 
         data_loader = torch.utils.data.DataLoader(
-            self.training_set, batch_size=self.config.get('batch_size'), shuffle=False, cycle=False
+            dataset, batch_size=self.config.get('batch_size'), shuffle=False
         )
 
         it = enumerate(data_loader)
@@ -244,9 +250,13 @@ class PeptideEncoderLSTM(ray.tune.Trainable):
             )
             data_to_device = PeptideEncoderTrainingDatasetItem(*data_to_device)
 
-            embedded_x = self.net(data_to_device.encoded_xs)
-            embedded_y = self.net(data_to_device.encoded_ys)
-            embedded_distance = torch.dist(embedded_x, embedded_y)
+            x_lengths = dataset.get_trimmed_peptide_lengths(data_to_device.aa_sequence_xs)
+            y_lengths = dataset.get_trimmed_peptide_lengths(data_to_device.aa_sequence_ys)
+
+            embedded_x = self.net(data_to_device.encoded_xs, x_lengths)
+            embedded_y = self.net(data_to_device.encoded_ys, y_lengths)
+
+            embedded_distance = pepenc_utils.calculate_matched_minkowski_distances(embedded_x, embedded_y)
             embedded_similarity = one - embedded_distance
 
             device_data = _PeptideEncoderLSTMDeviceDataStructures(
@@ -273,29 +283,23 @@ class PeptideEncoderLSTM(ray.tune.Trainable):
 
         # we need to convert the input data back from torch to numpy...
         ret = PeptideEncoderLSTMPredictionResults(
-            np.array(all_sequence_px),
-            np.array(all_sequence_py),
-            torch_utils.tensor_list_to_numpy(all_encoded_px),
-            torch_utils.tensor_list_to_numpy(all_encoded_py),
-            np.array(all_embedded_px),
-            np.array(all_embedded_py),
-            torch_utils.tensor_list_to_numpy(all_similarity),
-            np.array(all_embedded_similarity)
+            np.concatenate(all_sequence_px),
+            np.concatenate(all_sequence_py),
+            torch_utils.tensor_list_to_numpy(torch.cat(all_encoded_px)),
+            torch_utils.tensor_list_to_numpy(torch.cat(all_encoded_py)),
+            np.concatenate(all_embedded_px),
+            np.concatenate(all_embedded_py),
+            torch_utils.tensor_list_to_numpy(torch.cat(all_similarity)),
+            np.concatenate(all_embedded_similarity)
         )
 
         return ret
 
-    def _val_step(self,
-            dataset:PeptideEncoderTrainingDataset,
-            prefix:str="",
-            progress_bar:bool=False) -> Dict[str, float]:
+    def _val_step(self, prefix:str="validation_", progress_bar:bool=False) -> Dict[str, float]:
         """ Make predictions on `dataset` and summarize the performance
 
         Parameters
         ----------
-        dataset : PeptideEncoderTrainingDataset
-            The dataset
-
         prefix : str
             A prefix can be added to each key in `metrics`
 
@@ -312,7 +316,7 @@ class PeptideEncoderLSTM(ray.tune.Trainable):
         """
 
         # make the predictions
-        preds = self._pred(dataset, progress_bar=progress_bar)
+        preds = self._pred(self.validation_set, progress_bar=progress_bar, include_embeddings=True)
         
         # calculate all metrics
         mse = sklearn.metrics.mean_squared_error(
