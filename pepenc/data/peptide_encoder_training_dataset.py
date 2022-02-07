@@ -1,7 +1,8 @@
-""" This module contains a pytorch dataset for learning peptide sequence encodings.
+""" This module contains a pytorch dataset for learning peptide embeddings.
 
-In particular, each "instance" of the dataset comprises two peptide sequences, as well as the sNebula similarity
-between them. The sNebula distance reflects the BLOSSUM similarity transformed from 0 to 1.
+In particular, each "instance" of the dataset comprises two peptide sequences,
+as well as the sNebula similarity between them. The sNebula distance reflects
+the BLOSSUM similarity transformed from 0 to 1.
 """
 import logging
 logger = logging.getLogger(__name__)
@@ -39,6 +40,12 @@ class PeptideEncoderTrainingDataset(torch.utils.data.Dataset):
     similarity score between them. Thus, each item from this dataset consists
     of two peptide sequences and the similarity score.
 
+    In case the dataset object should be used for validation, the
+    `is_validation` flag can be set to `True`. In that case, a fixed set of
+    pairings will be selected for the peptides so that performance metrics are
+    constant from iteration to iteration. Otherwise (i.e., for training), one
+    member of each pair is randomly sampled.
+
     Parameters
     ----------
     dataset_path : str
@@ -51,6 +58,9 @@ class PeptideEncoderTrainingDataset(torch.utils.data.Dataset):
 
         N.B. This should **not** be a one-hot representation, but, as stated,
         the integer index. Further, the padding character must be "-".
+
+    is_validation : bool
+        Whether the dataset will be used for validation (or testing)
 
     sequence_column : str
         The name of the column which contains the amino acid sequences
@@ -70,12 +80,14 @@ class PeptideEncoderTrainingDataset(torch.utils.data.Dataset):
     def __init__(self,
             dataset_path:str,
             aa_encoding_map:string_utils.encoding_map_type,
+            is_validation:bool=False,
             sequence_column:str=_DEFAULT_SEQUENCE_COLUMN,
             max_len:int=_DEFAULT_MAX_LEN,
             seed:int=_DEFAULT_SEED,
             name:str=_DEFAULT_NAME):
 
         self.aa_encoding_map = aa_encoding_map
+        self.is_validation = is_validation
         self.sequence_column = sequence_column
         self.max_len = max_len        
         self.seed = seed
@@ -93,6 +105,9 @@ class PeptideEncoderTrainingDataset(torch.utils.data.Dataset):
             same_length=False
         )
         self.encoded_aa_sequences = self.encoded_aa_sequences.astype(int)
+
+        if self.is_validation:
+            self._matching_validation_item = np.random.permutation(len(self.aa_sequences))
         
 
     def log(self, msg:str, level:int=logging.INFO) -> None:
@@ -106,11 +121,14 @@ class PeptideEncoderTrainingDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx) -> PeptideEncoderTrainingDatasetItem:
         x = idx
 
-        # select the second sequence randomly
-        y = self.rng.integers(low=0, high=len(self), size=1)
-
-        # the rng returns an array...
-        y = y[0]
+        # and choose an appropriate matching index based on the dataset status
+        if self.is_validation:
+            y = self._matching_validation_item[idx]
+        else:
+            # select the second sequence randomly
+            y = self.rng.integers(low=0, high=len(self), size=1)
+            # the rng returns an array...
+            y = y[0]
         
         encoded_xs = self.encoded_aa_sequences[x]
         encoded_ys = self.encoded_aa_sequences[y]
@@ -138,6 +156,7 @@ class PeptideEncoderTrainingDataset(torch.utils.data.Dataset):
     def load(clazz,
             dataset_path:Optional[str],
             aa_encoding_map:string_utils.encoding_map_type,
+            is_validation:bool,
             name:str) -> Optional["PeptideEncoderTrainingDataset"]:
         """ Load the dataset given by `key` in `self.config`
         
@@ -150,6 +169,9 @@ class PeptideEncoderTrainingDataset(torch.utils.data.Dataset):
 
         aa_encoding_map : pyllars.string_utils.encoding_map_type
             A mapping from each amino acid to its integer index.
+
+    is_validation : bool
+        Whether the dataset will be used for validation (or testing)
 
         name : str
             The name for the dataset, if it is in the config file. Example:
@@ -167,6 +189,7 @@ class PeptideEncoderTrainingDataset(torch.utils.data.Dataset):
             dataset = PeptideEncoderTrainingDataset (
                 dataset_path=dataset_path,
                 aa_encoding_map=aa_encoding_map,
+                is_validation=is_validation,
                 name=name
             )
 

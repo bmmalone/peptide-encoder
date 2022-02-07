@@ -100,7 +100,7 @@ def test_peptide_encoder_training_dataset_padding(config:Mapping) -> None:
 
     # and check that the lengths match our original lengths
     assert np.array_equal(x_lengths, X_unpacked_lengths)
-      
+
 def run_all():
     """ Run all of the tests
 
