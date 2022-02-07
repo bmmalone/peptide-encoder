@@ -24,7 +24,7 @@ def get_sample_config_path():
     return str(path)
 
 def get_encoding_map_path():
-    path = _get_base_data_dir() / "data" / "intermediate" / "encoding-map.jpkl"
+    path = _get_base_data_dir() / "data" / "intermediate" / "oh-aa-encoding-map.jpkl"
     return str(path)
 
 def get_sample_peptides_path():
