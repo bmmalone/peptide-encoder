@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 import pyllars.logging_utils as logging_utils
 logging_utils.set_logging_values(logging_level='DEBUG')
 
+import numpy as np
 import torch
 
 from lifesci.peptide_dataset import PeptideDataset
@@ -68,12 +69,11 @@ def test_encoding_peptides_with_padding(config:Mapping) -> None:
     expected_shape = (len(aa_sequences), maxlen)
     assert (encoded_sequences.shape == expected_shape)
 
-
-
 def test_peptide_encoder_training_dataset_padding(config:Mapping) -> None:
     """ Ensure the training loop for the LSTM model behaves as expected """
     aa_encoding_map = data_utils.load_encoding_map()
 
+    # create the training dataset and loader
     training_set = PeptideEncoderTrainingDataset.load(
         config.get('training_set'), aa_encoding_map, "TrainingDataset"
     )
@@ -82,14 +82,24 @@ def test_peptide_encoder_training_dataset_padding(config:Mapping) -> None:
         training_set, batch_size=config.get('batch_size'), shuffle=True
     )
 
-    for batch_idx, data in enumerate(train_loader):
-               
-            peptide_x, peptide_y, px, py, similarity = data
+    # just check the first batch
+    data = next(iter(train_loader))
+    peptide_x, peptide_y, px, py, similarity = data
+    x_lengths = training_set.get_trimmed_peptide_lengths(peptide_x)
+            
+    # pack_padded_sequence so that padded items in the sequence won't be shown to the LSTM
+    X_packed = torch.nn.utils.rnn.pack_padded_sequence(px, x_lengths, batch_first=True, enforce_sorted=False)
 
-            break
+    # check that the packed data contains the number of elements we expected
+    num_data_items = X_packed.data.size()[0]
+    expected_num_data_items = sum(x_lengths)
+    assert num_data_items == expected_num_data_items
 
-    assert batch_idx > 0
+    # then unpack to make sure we get our original data back out
+    X_unpacked, X_unpacked_lengths = torch.nn.utils.rnn.pad_packed_sequence(X_packed, batch_first=True)
 
+    # and check that the lengths match our original lengths
+    assert np.array_equal(x_lengths, X_unpacked_lengths)
       
 def run_all():
     """ Run all of the tests

@@ -84,6 +84,7 @@ class PeptideEncoderTrainingDataset(torch.utils.data.Dataset):
 
         df_peptides = PeptideDataset.load(dataset_path, sequence_column, filters=["standard_aa_only"])
         self.aa_sequences = df_peptides[self.sequence_column].values
+
         self.encoded_aa_sequences = string_utils.encode_all_sequences(
             sequences=self.aa_sequences,
             encoding_map=self.aa_encoding_map,
@@ -110,13 +111,12 @@ class PeptideEncoderTrainingDataset(torch.utils.data.Dataset):
 
         # the rng returns an array...
         y = y[0]
-
-        peptide_xs = self.aa_sequences[x]
-        peptide_ys = self.aa_sequences[y]
         
         encoded_xs = self.encoded_aa_sequences[x]
         encoded_ys = self.encoded_aa_sequences[y]
 
+        peptide_xs = self.aa_sequences[x]
+        peptide_ys = self.aa_sequences[y]
         similarities = sequence_similarity_utils.get_snebula_score(peptide_xs, peptide_ys)
 
         encoded_xs = torch.as_tensor(encoded_xs, dtype=torch.long)
@@ -127,6 +127,12 @@ class PeptideEncoderTrainingDataset(torch.utils.data.Dataset):
         )
 
         return ret
+
+    def get_trimmed_peptide_lengths(self, peptides) -> np.ndarray:
+        """ Extract the trimmed length of the given peptides, which accounts for max_len """
+        peptide_lengths = [len(p) for p in peptides]
+        trimmed_peptide_lengths = np.clip(peptide_lengths, 0, self.max_len)
+        return trimmed_peptide_lengths
         
     @classmethod
     def load(clazz,
