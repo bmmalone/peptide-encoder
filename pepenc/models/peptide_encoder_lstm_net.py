@@ -3,6 +3,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import torch
 import torch.nn as nn
 
 import pyllars.validation_utils as validation_utils
@@ -87,15 +88,55 @@ class PeptideEncoderLSTMNetwork(nn.Module):
             dropout=self.dropout
         )
 
-    def forward(self, seq):
-        """ Perform a forward pass to get the LSTM embedding for `seq` """
-        # embed the words
-        embeds = self.embeddings(seq)
+    def forward(self, seqs, seq_lengths):
+        """ Perform a forward pass to get the LSTM embedding for `seqs` """
+
+        # reset the LSTM hidden state. Must be done before you run a new batch. Otherwise the LSTM will treat a new
+        # batch as a continuation of a sequence
+        # see: https://towardsdatascience.com/taming-lstms-variable-sized-mini-batches-and-why-pytorch-is-good-for-your-health-61d35642972e
+
+        #TODO: this is not required. See description of (h_0, c_0) in the LSTM documentation:
+        # https://pytorch.org/docs/1.10/generated/torch.nn.LSTM.html#torch.nn.LSTM
+        #self.hidden_init = self._init_hidden()
+
+        ###
+        # 1. embed the amino acids
+        # 
+        # Dim transformation: (batch_size, max_seq_len, 1) -> (batch_size, max_seq_len, embedding_dim)
+        ###
+        embeds = self.embeddings(seqs)
         
-        # run the embeddings through the lstm
+        ###
+        # 2. run the embeddings through the lstm
+        #
+        # Dim transformation: (batch_size, seq_len, embedding_dim) -> (batch_size, seq_len, nb_lstm_units)
+        ###
+
+        # pack_padded_sequence so that padded items in the sequence won't be shown to the LSTM
+        embeds_packed = torch.nn.utils.rnn.pack_padded_sequence(embeds, seq_lengths, batch_first=True, enforce_sorted=False)
+
+        # we could also pass in initialization values for the hidden states here if we wanted. See the comment above
+        lstm_embeds, (h_n, c_n) = self.lstm(embeds_packed)#, self.hidden_init)
+
+        # unpack the LSTM embeddings
+        lstm_unpacked, lstm_unpacked_lengths = torch.nn.utils.rnn.pad_packed_sequence(lstm_embeds, batch_first=True)
+
+        ###
+        # 3. extract the output features for the last input (i.e., the index of the length) for each peptide
+        ###
+
+        # base-0        
+        lstm_output_index = lstm_unpacked_lengths-1
+
+        # by design, the indices are always on the CPU, so move them as needed
+        # see: https://github.com/pytorch/pytorch/issues/7466
+        lstm_output_index = lstm_output_index.to(device=lstm_unpacked.get_device())
+
+        # additionally, we need to index each row in the output for slicing.
+        # this can likely be made much more efficient (e.g., creating once and reusing)
+        lstm_item_index = torch.arange(lstm_unpacked.shape[0], device=lstm_unpacked.get_device())
+
+        # and then select the output features of the last relevant index for each sequence
+        lstm_output = lstm_unpacked[lstm_item_index, lstm_output_index]
         
-        # this gives (all_hidden_states, last_state)
-        all_hidden_states, last_state = self.lstm(embeds.view(len(seq), 1, -1))
-        last_hidden_state, last_cell_state = last_state
-        
-        return last_hidden_state
+        return lstm_output
