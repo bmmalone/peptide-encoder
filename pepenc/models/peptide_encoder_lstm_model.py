@@ -6,6 +6,7 @@ logger = logging.getLogger(__name__)
 
 import joblib
 import numpy as np
+import pathlib
 import ray.tune
 import sklearn.metrics
 import tqdm
@@ -16,8 +17,8 @@ import torch.optim as optim
 
 import toolz.dicttoolz as dicttoolz
 
-import pyllars.string_utils as string_utils
 import pyllars.torch.torch_utils as torch_utils
+import pyllars.utils
 
 import pepenc.pepenc_utils as pepenc_utils
 from pepenc.data.peptide_encoder_training_dataset import (
@@ -34,7 +35,7 @@ _DEFAULT_ADAM_LR = 0.01
 _DEFAULT_LR_PATIENCE = 3
 _DEFAULT_WEIGHT_DECAY = 0
 
-_EPOCH_SIZE = 40000
+_EPOCH_SIZE = 8192
 _TEST_SIZE = 4096
 
 _DEFAULT_NAME = "PeptideEncoderLSTM"
@@ -112,7 +113,7 @@ class PeptideEncoderLSTM(ray.tune.Trainable):
             raise KeyError(msg)
 
         #TODO: maybe there is a better way to do this
-        self.config['vocabulary_size'] = len(aa_encoding_map)
+        self.config['vocabulary_size'] = len(self.aa_encoding_map)
 
         self.training_set = PeptideEncoderTrainingDataset.load(
             self.config.get('training_set'), self.aa_encoding_map, is_validation=False, name="TrainingDataset"
@@ -344,3 +345,26 @@ class PeptideEncoderLSTM(ray.tune.Trainable):
 
     def load_checkpoint(self, checkpoint_dir):
         torch_utils.restore_model(self, checkpoint_dir)
+
+    @classmethod
+    def load(clazz, ray_checkpoint_file:str) -> "PeptideEncoderLSTM":
+        """ Load a model associated with the given checkout file
+
+        Parameters
+        ----------
+        ray_checkpoint_file : str
+            The full path to the Ray checkpoint file; this should be the actual `checkpoint.pt` file, not the directory.
+
+        Returns
+        -------
+        model : pepenc.models.PeptideEncoderLSTM
+            The model associated with the checkpoint
+        """
+        p = pathlib.Path(ray_checkpoint_file)
+
+        config = p.parent / "params.json"
+        config = pyllars.utils.load_config(config)
+
+        model = clazz(config)
+        model.load_checkpoint(p.parent)
+        return model

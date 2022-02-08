@@ -165,12 +165,12 @@ class PeptideEncoderTrainingDataset(torch.utils.data.Dataset):
         Parameters
         ----------
         dataset_path : typing.Optional[str]
-            T
+            The path to the dataset
 
         aa_encoding_map : pyllars.string_utils.encoding_map_type
             A mapping from each amino acid to its integer index.
 
-    is_validation : bool
+        is_validation : bool
         Whether the dataset will be used for validation (or testing)
 
         name : str

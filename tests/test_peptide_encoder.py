@@ -48,6 +48,19 @@ def test_peptide_encoder_lstm_model(config:Mapping) -> None:
     logs = model.step()
 
     assert len(logs) > 0
+    
+def test_peptide_encoder_lstm_model_ray_hyperparameters(config:Mapping) -> None:
+    """ Ensure the training loop for the LSTM model behaves as expected """
+
+    config['embedding_dim'] = 7
+    config['hidden_dim'] = 8
+    config['lstm_dropout'] = 0.425479
+    config['lstm_layers'] = 1
+
+    model = pepenc.models.PeptideEncoderLSTM(config)
+    logs = model.step()
+
+    assert len(logs) > 0
 
 
 def test_training_config(config:Mapping) -> None:
@@ -91,6 +104,8 @@ def run_all():
 
     config = get_config()
     test_training_config(config)
+
+    test_peptide_encoder_lstm_model_ray_hyperparameters(config)
 
     test_peptide_encoder_lstm_model(config)
 
