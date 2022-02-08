@@ -1,3 +1,6 @@
+# notepad++ and other backup files
+*.bak
+
 # test suite coverage
 coverage
 

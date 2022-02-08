@@ -1,0 +1,2 @@
+from pepenc.models.peptide_encoder_lstm_model import PeptideEncoderLSTM
+from pepenc.models.peptide_encoder_lstm_net import PeptideEncoderLSTMNetwork
