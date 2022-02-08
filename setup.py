@@ -13,6 +13,7 @@ def _safe_read_lines(f):
     return r
 
 console_scripts = [
+    'train-pepenc-models=pepenc.models.train_pepenc_models:main',
 ]
 
 install_requires = _safe_read_lines("./requirements.txt")
