@@ -75,7 +75,7 @@ def test_peptide_encoder_training_dataset_padding(config:Mapping) -> None:
 
     # create the training dataset and loader
     training_set = PeptideEncoderTrainingDataset.load(
-        config.get('training_set'), aa_encoding_map, "TrainingDataset"
+        config.get('training_set'), aa_encoding_map, is_validation=False, name="TrainingDataset"
     )
 
     train_loader = torch.utils.data.DataLoader(
