@@ -89,12 +89,12 @@ def description():
 
 setup(
     name='peptide_encoder',
-    version='0.1.0',
+    version='0.2.1',
     description=description(),
     long_description=readme(),
     keywords="peptide encoding blossum",
     url="https://github.com/bmmalone/peptide-encoder",
-    author="NLE",
+    author="Brandon Malone",
     author_email="bmmalone@gmail.com",
     license='MIT',
     packages=find_packages(),
