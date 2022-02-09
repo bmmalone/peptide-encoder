@@ -7,13 +7,16 @@ logger = logging.getLogger(__name__)
 import joblib
 import numpy as np
 import pathlib
-import ray.tune
 import sklearn.metrics
 import tqdm
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
+
+
+import ray.tune
+from ray.tune import ExperimentAnalysis
 
 import toolz.dicttoolz as dicttoolz
 
@@ -367,4 +370,39 @@ class PeptideEncoderLSTM(ray.tune.Trainable):
 
         model = clazz(config)
         model.load_checkpoint(p.parent)
+        return model
+
+    @classmethod
+    def load_from_ray_results(clazz, ray_experiment_folder:str, metric:str="validation_median_absolute_error",
+            mode:str="min") -> "PeptideEncoderLSTM":
+        """ Load the best model from Ray results
+
+        Parameters
+        ----------
+        ray_experiment_folder : str
+            The path to the Ray experiment results
+
+        metric, mode: str
+            The criteria for selecting the best model
+
+        Returns
+        -------
+        model : pepenc.models.PeptideEncoderLSTM
+            The model associated with the best checkpoint
+        """
+            
+        # see: https://github.com/ray-project/ray/issues/21212
+        from ray.rllib import register_trainable
+        register_trainable("PeptideEncoderLSTM", PeptideEncoderLSTM)
+
+        # load the existing analysis
+        analysis = ExperimentAnalysis(ray_experiment_folder)
+        
+        # get the best result
+        best_trial = analysis.get_best_trial(metric=metric, mode=mode, scope="all") 
+        # Gets best checkpoint for trial based on accuracy.
+        best_checkpoint = analysis.get_best_checkpoint(best_trial, metric=metric, mode=mode)
+
+        model = PeptideEncoderLSTM.load(best_checkpoint)
+
         return model
