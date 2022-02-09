@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 # If using the pyllars package, these lines can be used so that the logger
 # actually outputs logging statements across all modules.
 ###
-#import pyllars.logging_utils as logging_utils
-#logging_utils.set_logging_values(logging_level='DEBUG')
+import pyllars.logging_utils as logging_utils
+logging_utils.set_logging_values(logging_level='DEBUG')
 
 import pepenc
 import pepenc.data.data_utils as data_utils
