@@ -49,14 +49,6 @@ def test_peptide_encoder_lstm_model(config:Mapping) -> None:
 
     assert len(logs) > 0
 
-
-def test_training_config(config:Mapping) -> None:
-    """ Ensure the mode is set correctly on `config`
-    """
-    # "Assert" that we have the expected path for the training file
-    expected_training_path = "/prj/peptide-encoder/data/raw/sample-peptides.training.csv"
-    assert (expected_training_path == config['training_set'])
-
 def test_version(version:str) -> None:
     """ Ensure we have the correct version
 
@@ -77,7 +69,7 @@ def test_version(version:str) -> None:
     # we do not really have an "Act" phase in this simple test
 
     # "Assert" that we have the expected behavior
-    expected_version = '0.1.0'
+    expected_version = '0.2.1'
     assert (expected_version == version)
     
 def run_all():
@@ -90,8 +82,6 @@ def run_all():
     test_version(version)
 
     config = get_config()
-    test_training_config(config)
-
     test_peptide_encoder_lstm_model(config)
 
 if __name__ == '__main__':

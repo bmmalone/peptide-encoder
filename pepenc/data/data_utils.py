@@ -9,10 +9,10 @@ import yaml
 from typing import Mapping
 
 def _get_base_data_dir() -> pathlib.Path:
-    import pepenc # that's me!
-    base_data_dir = os.path.dirname(pepenc.__file__)
+    import pepenc.data # that's me!
+    base_data_dir = os.path.dirname(pepenc.data.__file__)
     base_data_dir = pathlib.Path(base_data_dir)
-    base_data_dir = base_data_dir.parent
+    #base_data_dir = base_data_dir.parent
     return base_data_dir
 
 ###
@@ -24,23 +24,23 @@ def get_sample_config_path():
     return str(path)
 
 def get_encoding_map_path():
-    path = _get_base_data_dir() / "data" / "intermediate" / "oh-aa-encoding-map.jpkl"
+    path = _get_base_data_dir() / "intermediate" / "oh-aa-encoding-map.jpkl"
     return str(path)
 
 def get_sample_peptides_path():
-    path = _get_base_data_dir() / "data" / "raw" / "sample-peptides.training.csv"
+    path = _get_base_data_dir() / "raw" / "sample-peptides.training.csv"
     return str(path)
 
 def get_sample_training_peptides_path():
-    path = _get_base_data_dir() / "data" / "raw" / "sample-peptides.training.csv"
+    path = _get_base_data_dir() / "raw" / "sample-peptides.training.csv"
     return str(path)
 
 def get_sample_test_peptides_path():
-    path = _get_base_data_dir() / "data" / "raw" / "sample-peptides.test.csv"
+    path = _get_base_data_dir() / "raw" / "sample-peptides.test.csv"
     return str(path)
 
 def get_sample_validation_peptides_path():
-    path = _get_base_data_dir() / "data" / "raw" / "sample-peptides.validation.csv"
+    path = _get_base_data_dir() / "raw" / "sample-peptides.validation.csv"
     return str(path)
 
 ###

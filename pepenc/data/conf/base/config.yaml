@@ -1,0 +1,34 @@
+name: SampleConfigModel
+
+# usually automatically set, so this just needs to be set in some special case
+#device_name: cuda
+
+# model architecture
+embedding_dim: 16
+hidden_dim: 32
+
+lstm_layers: 2
+lstm_dropout: 0.5
+
+# optimizer
+adam_beta1: 0.9
+adam_beta2: 0.999
+adam_lr: 0.01
+weight_decay: 0
+
+# learning rate scheduler
+lr_patience: 3
+
+# other training details
+batch_size: 64
+
+# the max length for the peptides
+# all sequences will be padded or truncated (from the right) to this length
+max_sequence_length: 27
+
+# in tests, these paths will be overwritten with correct paths
+training_set: /prj/peptide-encoder/data/raw/sample-peptides.training.csv
+validation_set: /prj/peptide-encoder/data/raw/sample-peptides.validation.csv
+test_set: /prj/peptide-encoder/data/raw/sample-peptides.test.csv
+
+aa_encoding_map: /prj/peptide-encoder/data/intermediate/oh-aa-encoding-map.jpkl
