@@ -1,0 +1,5 @@
+include pepenc/data/conf/base/config.yaml
+include pepenc/data/raw/sample-peptides.training.csv
+include pepenc/data/raw/sample-peptides.validation.csv
+include pepenc/data/raw/sample-peptides.test.csv
+include pepenc/data/intermediate/oh-aa-encoding-map.jpkl
