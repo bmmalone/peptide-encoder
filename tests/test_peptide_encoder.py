@@ -69,7 +69,7 @@ def test_version(version:str) -> None:
     # we do not really have an "Act" phase in this simple test
 
     # "Assert" that we have the expected behavior
-    expected_version = '0.2.1'
+    expected_version = '0.2.2'
     assert (expected_version == version)
     
 def run_all():
