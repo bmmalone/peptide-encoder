@@ -7,15 +7,28 @@ the vector space is proportional to their BLOSUM62 similarity.
 
 ### Installation
 
-This project is written in `python3` and can be installed with `pip`.
+This project is written in `python3` and can be installed with `pip`. It is available on PyPI.
+
 
 ```
-pip3 install .
+pip3 install --find-links https://download.pytorch.org/whl/cu113/torch_stable.html peptide-encoder
 ```
 
-**Prerequisites**: This project relies on quite a few prerequisites, such as pytorch, ray, cudnn, and others. Further,
-this is mostly a hobby project. Consequently, the `requirements.txt` file does not include a complete set of
-prerequisites at this time. Ideally, this is updated in the future....
+Alternatively, the package can be installed from source.
+
+```
+git clone https://github.com/bmmalone/peptide-encoder.git
+cd piptide-encoder
+pip3 install -r requirements.txt .
+```
+
+(The "period" at the end is required.)
+
+**Prerequisites**: This project relies on quite a few prerequisites, such as pytorch, ray, cudnn, and others. Both the
+`requirements.txt` and `setup.py` files aim to install these dependencies correctly; nevertheless, it may still be
+preferable to install these dependencies before installing this package.
+
+In particular, the `find-links` argument to pip may need to be adjusted depending on the available version of CUDA.
 
 ### Usage
 
@@ -33,8 +46,8 @@ so that the changes take effect for the next run of ray.
 
 ### Documentation
 
-Unfortunately, see "Prerequisites", above. The file `conf/base/config.yaml` shows examples of all hyperparameters, data
-files, etc., for training models.
+Unfortunately, there is no sphinx, etc., documentation at this time. The file `conf/base/config.yaml` shows examples of
+all hyperparameters, data files, etc., for training models.
 
 #### Data format
 

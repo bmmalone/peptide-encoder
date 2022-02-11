@@ -16,7 +16,20 @@ console_scripts = [
     'train-pepenc-models=pepenc.models.train_pepenc_models:main',
 ]
 
-install_requires = _safe_read_lines("./requirements.txt")
+install_requires = [
+    "joblib",
+    "numpy",
+    "lifesci",
+    "pyllars",
+    "tqdm",
+    "pandas",
+    "pyyaml",
+    "ray[tune]",
+    "torch",
+    "gym",
+    "dm-tree",
+    "opencv-python",
+]
 
 tests_require = [
     'pytest',
@@ -50,7 +63,7 @@ classifiers = [
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Developers',
     'Intended Audience :: Science/Research',
-    'License :: OSI Approved :: BSD License',
+    'License :: OSI Approved :: MIT License',
     'Natural Language :: English',
     'Programming Language :: Python :: 3 :: Only',
     'Topic :: Scientific/Engineering :: Artificial Intelligence',
@@ -89,9 +102,10 @@ def description():
 
 setup(
     name='peptide_encoder',
-    version='0.2.1',
+    version='0.2.2',
     description=description(),
     long_description=readme(),
+    long_description_content_type='text/markdown',
     keywords="peptide encoding blossum",
     url="https://github.com/bmmalone/peptide-encoder",
     author="Brandon Malone",

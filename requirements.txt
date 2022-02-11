@@ -1,5 +1,15 @@
-numpy
-pandas
-scikit-learn
-scipy
-tqdm
+joblib==1.1.0
+numpy==1.21.2
+lifesci==0.3.1
+pyllars==1.0.4
+tqdm==4.62.3
+pandas==1.4.0
+pyyaml==6.0
+ray[tune]==1.9.2
+gym==0.21.0
+dm-tree==0.1.6
+opencv-python==4.5.5.62
+
+
+--find-links https://download.pytorch.org/whl/cu113/torch_stable.html
+torch==1.10.2+cu113
