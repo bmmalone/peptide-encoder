@@ -392,7 +392,7 @@ class PeptideEncoderLSTM(ray.tune.Trainable):
         """
             
         # see: https://github.com/ray-project/ray/issues/21212
-        from ray.rllib import register_trainable
+        from ray.tune import register_trainable
         register_trainable("PeptideEncoderLSTM", PeptideEncoderLSTM)
 
         # load the existing analysis

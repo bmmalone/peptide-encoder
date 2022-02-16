@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Missing `hyperopt` dependency
+- Unnecessary `ray.rllib` import for `register_trainable`
 
 ## [0.2.2] - 2022.02.11
 
