@@ -2,7 +2,7 @@
 #
 
 # You can set these variables from the command line.
-PACKAGEBASE   = ../aa_encode
+PACKAGEBASE   = ../pepenc
 
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build

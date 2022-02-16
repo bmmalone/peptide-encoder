@@ -18,7 +18,7 @@
 #       also suppresses the name of the class. Example usage:
 #
 #       ```
-#       .. autoclass_docstr_only:: aa_encode.aa_encoder.AAEncoder
+#       .. autoclass_docstr_only:: pepenc.models.peptide_encoder_lstm_model.PeptideEncoderLSTM
 #       ```
 #
 #   * `autono_docstr_text`: This can be used to suppress the docstring for
@@ -26,7 +26,7 @@
 #       definitions for a class. Example usage:
 #
 #       ```
-#       .. autono_docstr_text:: aa_encode.aa_encoder.AAEncoder
+#       .. autono_docstr_text:: pepenc.models.peptide_encoder_lstm_model.PeptideEncoderLSTM
 #       ```
 #
 #   * `:exclude-members: module_doc_str`: This option can be used to suppress
@@ -35,7 +35,7 @@
 #       introduced. Example usage:
 #
 #       ```
-#       .. automodule:: aa_encode.utils
+#       .. automodule:: pepenc.pepenc_utils
 #           :members:
 #           :exclude-members: module_doc_str
 #       ```

@@ -65,9 +65,8 @@ class PeptideEncoderLSTM(ray.tune.Trainable):
     Parameters
     ----------
     config : typing.Mapping
-        The configuration options. Please see the
-        aa_encoder.aa_encoder_net.AAEncoderNetwork documentation for further
-        configuration options.
+        The configuration options. Please see the pepenc.models.peptide_encoder_lstm_model.PeptideEncoderLSTMNetwork
+        documentation for further configuration options.
 
         * `mode`: valid options: "train", "pred"
         * `batch_size`: the training batch size

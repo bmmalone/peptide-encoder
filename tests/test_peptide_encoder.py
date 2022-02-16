@@ -58,7 +58,7 @@ def test_version(version:str) -> None:
     Parameters
     ----------
     version : str
-        A string representation of the version of `aa_encode`
+        A string representation of the version of `pepenc`
 
     Returns
     -------
