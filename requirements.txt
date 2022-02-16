@@ -9,6 +9,7 @@ ray[tune]==1.9.2
 gym==0.21.0
 dm-tree==0.1.6
 opencv-python==4.5.5.62
+hyperopt==0.2.7
 
 
 --find-links https://download.pytorch.org/whl/cu113/torch_stable.html

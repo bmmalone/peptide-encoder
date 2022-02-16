@@ -17,18 +17,19 @@ console_scripts = [
 ]
 
 install_requires = [
+    "dm-tree",
+    "gym",
+    "hyperopt",
     "joblib",
-    "numpy",
     "lifesci",
-    "pyllars",
-    "tqdm",
+    "numpy",
+    "opencv-python",
     "pandas",
+    "pyllars",
     "pyyaml",
     "ray[tune]",
     "torch",
-    "gym",
-    "dm-tree",
-    "opencv-python",
+    "tqdm",
 ]
 
 tests_require = [
