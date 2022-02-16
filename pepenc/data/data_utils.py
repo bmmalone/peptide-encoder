@@ -44,7 +44,7 @@ def get_sample_validation_peptides_path():
     return str(path)
 
 def get_sample_ray_experiment_path():
-    path = _get_base_data_dir() / "models" / "ray-tune-experiment"
+    path = _get_base_data_dir() / "models" / "ray-tune-experiment" / "experiment_state.json"
     return str(path)
 
 ###
