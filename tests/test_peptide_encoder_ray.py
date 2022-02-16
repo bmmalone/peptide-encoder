@@ -27,13 +27,20 @@ def get_config() -> Mapping:
     config = data_utils.load_sample_config()
     return config
 
+def get_ray_experiment_folder() -> str:
+    ray_experiment_folder = data_utils.get_sample_ray_experiment_path()
+    return ray_experiment_folder
+
 @pytest.fixture
 def config() -> Mapping:
     return get_config()
 
-def test_load_peptide_encoder_lstm_model_class_method() -> None:
-    checkpoint_folder = pathlib.Path("/tmp/my-quick-pepenc-tune-exp/")
-    model = PeptideEncoderLSTM.load_from_ray_results(checkpoint_folder)
+@pytest.fixture
+def ray_experiment_folder() -> str:
+    return get_ray_experiment_folder()
+
+def test_load_peptide_encoder_lstm_model_class_method(ray_experiment_folder:str) -> None:
+    model = PeptideEncoderLSTM.load_from_ray_results(ray_experiment_folder)
     val_results = model._val_step()
     assert val_results['validation_median_absolute_error'] < 0.1
 
@@ -45,8 +52,9 @@ def run_all():
     """
     # since we are not running through pytest, we have to grab the inputs to the tests
     config = get_config()
+    ray_experiment_folder = get_ray_experiment_folder()
 
-    test_load_peptide_encoder_lstm_model_class_method()
+    test_load_peptide_encoder_lstm_model_class_method(ray_experiment_folder)
 
 if __name__ == '__main__':
     run_all()

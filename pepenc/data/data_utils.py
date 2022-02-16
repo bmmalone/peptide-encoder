@@ -1,5 +1,5 @@
 """ This module contains helpers for automatically loading data files stored
-in the aa_encode/data folder.
+in the pepenc/data folder.
 """
 import joblib
 import os
@@ -16,7 +16,7 @@ def _get_base_data_dir() -> pathlib.Path:
     return base_data_dir
 
 ###
-# Paths to files in the `aa_encode/data` directory
+# Paths to files in the `pepenc/data` directory
 ###
 
 def get_sample_config_path():
@@ -41,6 +41,10 @@ def get_sample_test_peptides_path():
 
 def get_sample_validation_peptides_path():
     path = _get_base_data_dir() / "raw" / "sample-peptides.validation.csv"
+    return str(path)
+
+def get_sample_ray_experiment_path():
+    path = _get_base_data_dir() / "models" / "ray-tune-experiment"
     return str(path)
 
 ###
